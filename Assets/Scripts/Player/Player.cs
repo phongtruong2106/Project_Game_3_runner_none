@@ -6,6 +6,9 @@ public class Player : MonoBehaviour
 {
    public float gravity; //luc hap dan (tuy chinh do cao cua nhan vat khi jump)
    public Vector2 velocity; //toc do nhan vat
+   public float maxVelocity = 100f;
+   public float distance = 0; //bien dem 
+   public float maxAcceleration = 10f;
    public float acceleration = 10f;
 
    public float jumpVelocity = 20f; // toc do jump c
@@ -68,6 +71,20 @@ public class Player : MonoBehaviour
             }
         }
 
+        distance += velocity.x * Time.fixedDeltaTime;
+
+        if(isGrounded)
+        {
+
+            float velocityRatio = velocity.x / maxVelocity;
+           
+            acceleration = maxAcceleration * (1 - velocityRatio);
+            velocity.x += acceleration * Time.fixedDeltaTime;
+            if(velocity.x >= maxVelocity)
+            {
+                velocity.x = maxVelocity;
+            }
+        }
         transform.position = pos;
    }
 
