@@ -57,18 +57,37 @@ public class Player : MonoBehaviour
                     isHoldingJump = false;
                 }
             }
+            else
+            {
+                holdJumpTimer -= Time.fixedDeltaTime; // Giảm giá trị của holdJumpTimer sau mỗi lần nhảy
+                if (holdJumpTimer < 0)
+                {
+                    holdJumpTimer = 0;
+                }
+            }
 
             pos.y += velocity.y * Time.fixedDeltaTime;
             if(!isHoldingJump)
             {
                 velocity.y += gravity * Time.fixedDeltaTime;
             }
-            if(pos.y <= groundHeight)
+
+            Vector2 rayOrigin = new Vector2(pos.x + 0.7f, pos.y);
+            Vector2 rayDirection = Vector2.up;
+            float rayDistance = velocity.y * Time.fixedDeltaTime;
+            RaycastHit2D hit2D = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance);
+            if(hit2D.collider != null)
             {
-                pos.y = groundHeight; //toa do nhan vat  bang voi do cao ground da duoc dat truoc doa
-                isGrounded = true;
-                holdJumpTimer = 0; //khi holdjUMPtime dat den nguong maxHoldTimeJump => se tro ve 0
+                Ground ground = hit2D.collider.GetComponent<Ground>();
+                if(ground != null)
+                {
+                    groundHeight = ground.groundHeight;
+                    pos.y = groundHeight;
+                    velocity.y = 0;
+                    isGrounded = true;
+                }
             }
+            Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red);
         }
 
         distance += velocity.x * Time.fixedDeltaTime;
@@ -84,7 +103,18 @@ public class Player : MonoBehaviour
             {
                 velocity.x = maxVelocity;
             }
+
+            Vector2 rayOrigin = new Vector2(pos.x - 0.7f, pos.y);
+            Vector2 rayDirection = Vector2.up;
+            float rayDistance = velocity.y * Time.fixedDeltaTime;
+            RaycastHit2D hit2D = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance);
+            if(hit2D.collider == null)
+            {
+                isGrounded = false;
+            }
+            Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.yellow);
         }
+
         transform.position = pos;
    }
 
