@@ -12,6 +12,9 @@ public class Ground : MonoBehaviour
     private new BoxCollider2D collider2D;
     private bool didGenerateGround = false;
 
+    [SerializeField] 
+    private Obstacle boxTemplate;
+
     private void Awake() {
         player = GameObject.Find("Player").GetComponent<Player>();
 
@@ -53,7 +56,7 @@ public class Ground : MonoBehaviour
 
         float h1 = player.jumpVelocity * player.maxHoldJumpTime;
         float t  = player.jumpVelocity / -player.gravity;
-        float h2 = player.jumpVelocity * t + (0.5f * (-player.gravity * (t * t)));
+        float h2 = player.jumpVelocity * t + (0.5f * (player.gravity * (t * t)));
         float maxJumpHeight = h1 + h2;
         float maxY = maxJumpHeight * 0.7f;
         maxY *= groundHeight;
@@ -78,5 +81,18 @@ public class Ground : MonoBehaviour
 
         Ground goGround = go.GetComponent<Ground>();
         goGround.groundHeight  = go.transform.position.y + (goCollider.size.y / 2);
+
+        int obstacleNum = Random.Range(0,4); //create number Random 0 to 4
+        for (int i = 0 ; i < obstacleNum; i++) //create loop i , browsing 1 to 4 random
+        {
+            GameObject box=  Instantiate(boxTemplate.gameObject);
+             float y  = goGround.groundHeight;
+             float halfWidth = goCollider.size.x / 2 - 1;
+             float left = go.transform.position.x - halfWidth;
+             float right = go.transform.position.x + halfWidth;
+             float x = Random.Range(left, right);
+            Vector2 boxPos = new Vector2(x, y);
+            box.transform.position = boxPos;
+        }
     }
 }
