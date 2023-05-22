@@ -15,6 +15,8 @@ public class Ground : MonoBehaviour
     [SerializeField] 
     private Obstacle boxTemplate;
 
+
+   
     private void Awake() {
         player = GameObject.Find("Player").GetComponent<Player>();
 

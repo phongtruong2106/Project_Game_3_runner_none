@@ -24,6 +24,10 @@ public class Player : MonoBehaviour
 
    public bool isDead = false;
 
+   [SerializeField] 
+   private LayerMask whatIsGround;
+   [SerializeField] 
+    private LayerMask whatIsObstacles;
 
    private void Update()
     {
@@ -90,7 +94,7 @@ public class Player : MonoBehaviour
             Vector2 rayOrigin = new Vector2(pos.x + 0.7f, pos.y);
             Vector2 rayDirection = Vector2.up;
             float rayDistance = velocity.y * Time.fixedDeltaTime;
-            RaycastHit2D hit2D = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance);
+            RaycastHit2D hit2D = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, whatIsGround);
             if(hit2D.collider != null)
             {
                 Ground ground = hit2D.collider.GetComponent<Ground>();
@@ -109,7 +113,7 @@ public class Player : MonoBehaviour
             Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red);
 
             Vector2 wallOrigin = new Vector2(pos.x, pos.y);
-            RaycastHit2D wallhit  = Physics2D.Raycast(wallOrigin, Vector2.right, velocity.x * Time.fixedDeltaTime);
+            RaycastHit2D wallhit  = Physics2D.Raycast(wallOrigin, Vector2.right, velocity.x * Time.fixedDeltaTime, whatIsGround);
             if(wallhit.collider != null)
             {
                 Ground ground = wallhit.collider.GetComponent<Ground>();
@@ -152,7 +156,7 @@ public class Player : MonoBehaviour
         }
 
         Vector2 obsOrigin = new Vector2(pos.x , pos.y);
-        RaycastHit2D obstHitX =Physics2D.Raycast(obsOrigin, Vector2.right, velocity.x * Time.fixedDeltaTime);
+        RaycastHit2D obstHitX =Physics2D.Raycast(obsOrigin, Vector2.right, velocity.x * Time.fixedDeltaTime, whatIsObstacles);
         if(obstHitX.collider != null)
         {
             Obstacle obstacle = obstHitX.collider.GetComponent<Obstacle>();
@@ -161,7 +165,7 @@ public class Player : MonoBehaviour
                 hitObstacle(obstacle);
             }
         }
-        RaycastHit2D obstHitY =Physics2D.Raycast(obsOrigin, Vector2.up, velocity.y * Time.fixedDeltaTime);
+        RaycastHit2D obstHitY =Physics2D.Raycast(obsOrigin, Vector2.up, velocity.y * Time.fixedDeltaTime, whatIsObstacles);
         if(obstHitY.collider != null)
         {
             Obstacle obstacle = obstHitY.collider.GetComponent<Obstacle>();
