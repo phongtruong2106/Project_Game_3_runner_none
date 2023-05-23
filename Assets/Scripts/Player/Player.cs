@@ -1,6 +1,8 @@
+using System.Security.Cryptography.X509Certificates;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -28,7 +30,15 @@ public class Player : MonoBehaviour
    private LayerMask whatIsGround;
    [SerializeField] 
     private LayerMask whatIsObstacles;
+    
+    [SerializeField]
+    private Button jumpButton;
 
+   private GroundFall fall;
+   private void Start()
+    {
+        jumpButton.onClick.AddListener(OnclickButtonClicked);
+    }
    private void Update()
     {
 
@@ -41,6 +51,14 @@ public class Player : MonoBehaviour
                 isGrounded= false;
                 velocity.y = jumpVelocity;
                 isHoldingJump = true;
+                holdJumpTimer = 0;
+                
+                if(fall != null)
+                {
+                    fall.player = null;
+                    fall = null;
+                }
+
             }
         }
 
@@ -58,12 +76,16 @@ public class Player : MonoBehaviour
         if(isDead)
         {
             return;
+        
         }
 
         if(pos.y < -20)
         {
             isDead = true; 
+            RemovedjumpButton();
         }
+
+        
 
         if(!isGrounded)
         {
@@ -73,15 +95,6 @@ public class Player : MonoBehaviour
                 if(holdJumpTimer >= maxHoldJumpTime)
                 {
                     isHoldingJump = false;
-                }
-                Debug.Log(holdJumpTimer);
-            }
-            else
-            {
-                holdJumpTimer -= Time.fixedDeltaTime; // Giảm giá trị của holdJumpTimer sau mỗi lần nhảy
-                if (holdJumpTimer < 0)
-                {
-                    holdJumpTimer = 0;
                 }
             }
 
@@ -94,12 +107,17 @@ public class Player : MonoBehaviour
             Vector2 rayOrigin = new Vector2(pos.x + 0.7f, pos.y);
             Vector2 rayDirection = Vector2.up;
             float rayDistance = velocity.y * Time.fixedDeltaTime;
+            if(fall != null)
+            {
+                rayDistance = -fall.fallSpeed * Time.fixedDeltaTime;
+            }
             RaycastHit2D hit2D = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, whatIsGround);
             if(hit2D.collider != null)
             {
                 Ground ground = hit2D.collider.GetComponent<Ground>();
                 if(ground != null)
                 {
+
                     if(pos.y >= ground.groundHeight)
                     {
                         groundHeight = ground.groundHeight;
@@ -108,23 +126,28 @@ public class Player : MonoBehaviour
                         isGrounded = true;
                     }
                   
+                    fall =ground.GetComponent<GroundFall>();
+                    if(fall != null)
+                    {
+                        fall.player = this;
+                    }
                 }
             }
             Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red);
 
             Vector2 wallOrigin = new Vector2(pos.x, pos.y);
-            RaycastHit2D wallhit  = Physics2D.Raycast(wallOrigin, Vector2.right, velocity.x * Time.fixedDeltaTime, whatIsGround);
-            if(wallhit.collider != null)
+            Vector2 wallDir = Vector2.right;
+            RaycastHit2D wallHit  = Physics2D.Raycast(wallOrigin, Vector2.right, velocity.x * Time.fixedDeltaTime, whatIsGround);
+            if (wallHit.collider != null)
             {
-                Ground ground = wallhit.collider.GetComponent<Ground>();
-                if(ground != null)
+                Ground ground = wallHit.collider.GetComponent<Ground>();
+                if (ground != null)
                 {
-                     if(pos.y < ground.groundHeight)
-                     {
-                        velocity.x = 0; 
-                     }
+                    if (pos.y < ground.groundHeight)
+                    {
+                        velocity.x = 0;
+                    }
                 }
-                
             }
         }
 
@@ -183,4 +206,23 @@ public class Player : MonoBehaviour
         velocity.x *= 0.7f;
     }
 
+   public void OnclickButtonClicked()
+    {   
+        Vector2 pos = transform.position;
+        float groundDistance = Mathf.Abs(pos.y - groundHeight);
+        if (isGrounded || groundDistance < jumpGroundThreshold)
+        {
+            isGrounded = false;
+            velocity.y = jumpVelocity;
+            isHoldingJump = true;
+        }
+    }
+
+    private void RemovedjumpButton()
+    {
+        if(jumpButton != null)
+        {
+            jumpButton.gameObject.SetActive(false);
+        }
+    }
 }

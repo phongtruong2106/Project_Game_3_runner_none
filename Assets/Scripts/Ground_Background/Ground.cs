@@ -19,14 +19,18 @@ public class Ground : MonoBehaviour
    
     private void Awake() {
         player = GameObject.Find("Player").GetComponent<Player>();
-
        collider2D = GetComponent<BoxCollider2D>();
-       groundHeight = transform.position.y + (collider2D.size.y /2);
        screenRight =Camera.main.transform.position.x * 2;
+    }
+
+
+    private void Update() {
+        groundHeight = transform.position.y + (collider2D.size.y /2);
     }
 
     private void FixedUpdate() 
     {
+        
         Vector2 pos = transform.position;
         pos.x -= player.velocity.x * Time.fixedDeltaTime;
         groundRight = transform.position.x + (collider2D.size.x / 2);
@@ -48,13 +52,13 @@ public class Ground : MonoBehaviour
 
         transform.position = pos;
 
-    }
+    } 
 
     private void generateGround()
     {
         GameObject go = Instantiate(gameObject);
         BoxCollider2D goCollider = go.GetComponent<BoxCollider2D>();
-        Vector2 pos;
+        Vector2 pos ;
 
         float h1 = player.jumpVelocity * player.maxHoldJumpTime;
         float t  = player.jumpVelocity / -player.gravity;
@@ -84,6 +88,20 @@ public class Ground : MonoBehaviour
         Ground goGround = go.GetComponent<Ground>();
         goGround.groundHeight  = go.transform.position.y + (goCollider.size.y / 2);
 
+
+        GroundFall fall = go.GetComponent<GroundFall>();
+        if(fall != null)
+        {
+            Destroy(fall);
+            fall = null;
+        }
+        if(Random.Range(0,3) == 0)
+        {
+            fall = go.AddComponent<GroundFall>();
+            fall.fallSpeed = Random.Range(1.0f,3.0f);
+        }
+
+
         int obstacleNum = Random.Range(0,4); //create number Random 0 to 4
         for (int i = 0 ; i < obstacleNum; i++) //create loop i , browsing 1 to 4 random
         {
@@ -95,6 +113,13 @@ public class Ground : MonoBehaviour
              float x = Random.Range(left, right);
             Vector2 boxPos = new Vector2(x, y);
             box.transform.position = boxPos;
+
+            if(fall != null)
+            {
+                Obstacle o = box.GetComponent<Obstacle>();
+                fall.obstacles.Add(o);
+            }
+            
         }
     }
 }
