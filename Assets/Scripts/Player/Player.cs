@@ -35,16 +35,18 @@ public class Player : MonoBehaviour
     private Button jumpButton;
 
    private GroundFall fall;
+   private CameraController cameraController;
    private void Start()
     {
         jumpButton.onClick.AddListener(OnclickButtonClicked);
+        cameraController = Camera.main.GetComponent<CameraController>();
     }
    private void Update()
     {
 
         Vector2 pos = transform.position;
         float groundDistance = Mathf.Abs(pos.y - groundHeight);
-        if(isGrounded || groundDistance < jumpGroundThreshold)
+        if(isGrounded || groundDistance <= jumpGroundThreshold)
         {
             if(Input.GetKeyDown(KeyCode.Space))
             {
@@ -57,6 +59,7 @@ public class Player : MonoBehaviour
                 {
                     fall.player = null;
                     fall = null;
+                    cameraController.StopShaking();
                 }
 
             }
@@ -71,14 +74,12 @@ public class Player : MonoBehaviour
 
    private void FixedUpdate() 
    {
-        Vector2 pos = transform.position;//thay doi toa do nhan vat
-
         if(isDead)
         {
             return;
-        
         }
 
+        Vector2 pos = transform.position;//thay doi toa do nhan vat
         if(pos.y < -20)
         {
             isDead = true; 
@@ -107,10 +108,6 @@ public class Player : MonoBehaviour
             Vector2 rayOrigin = new Vector2(pos.x + 0.7f, pos.y);
             Vector2 rayDirection = Vector2.up;
             float rayDistance = velocity.y * Time.fixedDeltaTime;
-            if(fall != null)
-            {
-                rayDistance = -fall.fallSpeed * Time.fixedDeltaTime;
-            }
             RaycastHit2D hit2D = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, whatIsGround);
             if(hit2D.collider != null)
             {
@@ -130,6 +127,7 @@ public class Player : MonoBehaviour
                     if(fall != null)
                     {
                         fall.player = this;
+                        cameraController.StartShaking();
                     }
                 }
             }
@@ -170,6 +168,11 @@ public class Player : MonoBehaviour
             Vector2 rayOrigin = new Vector2(pos.x - 0.7f, pos.y);
             Vector2 rayDirection = Vector2.up;
             float rayDistance = velocity.y * Time.fixedDeltaTime;
+            
+            if (fall != null)
+            {
+                rayDistance = -fall.fallSpeed * Time.fixedDeltaTime;
+            }
             RaycastHit2D hit2D = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance);
             if(hit2D.collider == null)
             {
